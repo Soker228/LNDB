@@ -9,18 +9,24 @@ import top.guoziyang.mydb.backend.dm.page.Page;
 import top.guoziyang.mydb.backend.utils.Panic;
 import top.guoziyang.mydb.common.Error;
 
+/**
+ * 页面缓存
+ * 默认提供两个静态方法：
+ *      create(String path, long memory)：新建一个数据库文件和数据页面缓存器
+ *      open(String path, long memory)：打开一个数据库文件和数据页面缓存器
+ */
 public interface PageCache {
-    
-    public static final int PAGE_SIZE = 1 << 13;
 
-    int newPage(byte[] initData);
-    Page getPage(int pgno) throws Exception;
-    void close();
-    void release(Page page);
+    public static final int PAGE_SIZE = 1 << 13; // 页面大小 8K
 
-    void truncateByBgno(int maxPgno);
-    int getPageNumber();
-    void flushPage(Page pg);
+    int newPage(byte[] initData);               // 将数据打包成一个数据页
+    Page getPage(int pgno) throws Exception;    // 获取一个数据页
+    void close();                               // 关闭数据页缓存器
+    void release(Page page);                    // 释放一个数据页缓存
+
+    void truncateByBgno(int maxPgno);           // 删除maxPgno后面的数据页
+    int getPageNumber();                        // 获取当前数据库文件的页面总数
+    void flushPage(Page pg);                    // 将数据页写入数据源中
 
     public static PageCacheImpl create(String path, long memory) {
         File f = new File(path+PageCacheImpl.DB_SUFFIX);

@@ -10,14 +10,24 @@ import java.nio.channels.FileChannel;
 import top.guoziyang.mydb.backend.utils.Panic;
 import top.guoziyang.mydb.common.Error;
 
+/**
+ * 提供一些接口供其他模块使用
+ * 提供两个静态方法 create 和 open，方便创建一个XID文件并开启事务管理模块，或者从已经存在的XID文件开启事务管理模块
+ */
 public interface TransactionManager {
-    long begin();
-    void commit(long xid);
-    void abort(long xid);
-    boolean isActive(long xid);
-    boolean isCommitted(long xid);
-    boolean isAborted(long xid);
-    void close();
+    long begin();                       // 开启一个新事务，返回事务id
+    void commit(long xid);              // 提交一个事务
+    void abort(long xid);               // 撤销一个事务（回滚）
+    boolean isActive(long xid);         // 查询一个事务的状态是否是正在进行的状态
+    boolean isCommitted(long xid);      // 查询一个事务的状态是否是已提交
+    boolean isAborted(long xid);        // 查询一个事务的状态是否是已取消
+    void close();                       // 关闭 TM
+
+    /**
+     * 创建一个新的XID文件，并开启事务管理模块
+     * @param path
+     * @return
+     */
 
     public static TransactionManagerImpl create(String path) {
         File f = new File(path+TransactionManagerImpl.XID_SUFFIX);

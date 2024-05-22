@@ -1,11 +1,11 @@
 package top.guoziyang.mydb.backend.dm.page;
 
 public interface Page {
-    void lock();
-    void unlock();
-    void release();
-    void setDirty(boolean dirty);
-    boolean isDirty();
-    int getPageNumber();
-    byte[] getData();
+    void lock();                    // 加锁
+    void unlock();                  // 解锁
+    void release();                 // 释放页面缓存
+    void setDirty(boolean dirty);   // 设置页面是否为脏页面，修改过的页面就是脏页面
+    boolean isDirty();              // 判断页面是否为脏页面
+    int getPageNumber();            // 获取页号
+    byte[] getData();               // 获取数据页的数据
 }

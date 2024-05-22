@@ -6,12 +6,12 @@ import java.util.concurrent.locks.ReentrantLock;
 import top.guoziyang.mydb.backend.dm.pageCache.PageCache;
 
 public class PageImpl implements Page {
-    private int pageNumber;
-    private byte[] data;
-    private boolean dirty;
+    private int pageNumber; // 页面的页号，从1开始
+    private byte[] data;    // 页面包含的数据
+    private boolean dirty;  // 该页面是否是脏页面，脏页面在缓存释放的时候需要被写回数据源
     private Lock lock;
-    
-    private PageCache pc;
+
+    private PageCache pc;   // 页面缓存
 
     public PageImpl(int pageNumber, byte[] data, PageCache pc) {
         this.pageNumber = pageNumber;
