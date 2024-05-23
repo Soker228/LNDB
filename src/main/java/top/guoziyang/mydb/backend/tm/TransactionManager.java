@@ -28,7 +28,6 @@ public interface TransactionManager {
      * @param path
      * @return
      */
-
     public static TransactionManagerImpl create(String path) {
         File f = new File(path+TransactionManagerImpl.XID_SUFFIX);
         try {
@@ -42,13 +41,14 @@ public interface TransactionManager {
             Panic.panic(Error.FileCannotRWException);
         }
 
+        // NIO操作文件的初始化
         FileChannel fc = null;
         RandomAccessFile raf = null;
         try {
             raf = new RandomAccessFile(f, "rw");
             fc = raf.getChannel();
         } catch (FileNotFoundException e) {
-           Panic.panic(e);
+            Panic.panic(e);
         }
 
         // 写空XID文件头
@@ -59,10 +59,16 @@ public interface TransactionManager {
         } catch (IOException e) {
             Panic.panic(e);
         }
-        
+
+        // 开启事务管理模块
         return new TransactionManagerImpl(raf, fc);
     }
 
+    /**
+     * 打开已经存在的XID文件并开启事务管理模块，只是少了一个写入Header的操作
+     * @param path
+     * @return
+     */
     public static TransactionManagerImpl open(String path) {
         File f = new File(path+TransactionManagerImpl.XID_SUFFIX);
         if(!f.exists()) {
@@ -78,7 +84,7 @@ public interface TransactionManager {
             raf = new RandomAccessFile(f, "rw");
             fc = raf.getChannel();
         } catch (FileNotFoundException e) {
-           Panic.panic(e);
+            Panic.panic(e);
         }
 
         return new TransactionManagerImpl(raf, fc);
