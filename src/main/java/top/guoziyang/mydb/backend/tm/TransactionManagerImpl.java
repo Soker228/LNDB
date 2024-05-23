@@ -33,11 +33,12 @@ public class TransactionManagerImpl implements TransactionManager {
     private long xidCounter;
     private Lock counterLock;
 
+    // 构造方法 默认（没有修饰符, 隐式 default）：本类 ，本包可以访问。
     TransactionManagerImpl(RandomAccessFile raf, FileChannel fc) {
         this.file = raf;
         this.fc = fc;
         counterLock = new ReentrantLock();
-        checkXIDCounter();
+        checkXIDCounter();  // 检查XID文件是否合法
     }
 
     /**
@@ -51,10 +52,12 @@ public class TransactionManagerImpl implements TransactionManager {
         } catch (IOException e1) {
             Panic.panic(Error.BadXIDFileException);
         }
+        // 文件长度小于8字节的文件头，校验不通过
         if(fileLen < LEN_XID_HEADER_LENGTH) {
             Panic.panic(Error.BadXIDFileException);
         }
 
+        // 读取xid文件中事务的个数
         ByteBuffer buf = ByteBuffer.allocate(LEN_XID_HEADER_LENGTH);
         try {
             fc.position(0);
@@ -63,18 +66,28 @@ public class TransactionManagerImpl implements TransactionManager {
             Panic.panic(e);
         }
         this.xidCounter = Parser.parseLong(buf.array());
+
+        // 取得最后一个事务在文件中的相对位置，也就是反推xid文件的长度, 在进行判断
         long end = getXidPosition(this.xidCounter + 1);
         if(end != fileLen) {
             Panic.panic(Error.BadXIDFileException);
         }
     }
 
-    // 根据事务xid取得其在xid文件中对应的位置
+    /**
+     * 根据事务ID取得其在xid文件中的相对位置
+     * @param xid 事务ID
+     * @return
+     */
     private long getXidPosition(long xid) {
         return LEN_XID_HEADER_LENGTH + (xid-1)*XID_FIELD_SIZE;
     }
 
-    // 更新xid事务的状态为status
+    /**
+     * 更新事务的状态
+     * @param xid 事务ID
+     * @param status 事务需要改变为的状态
+     */
     private void updateXID(long xid, byte status) {
         long offset = getXidPosition(xid);
         byte[] tmp = new byte[XID_FIELD_SIZE];
