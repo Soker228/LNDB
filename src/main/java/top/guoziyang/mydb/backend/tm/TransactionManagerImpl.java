@@ -99,6 +99,7 @@ public class TransactionManagerImpl implements TransactionManager {
         } catch (IOException e) {
             Panic.panic(e);
         }
+        // 所有的文件操作在执行后都需要立刻刷入文件中，防止在崩溃后文件丢失数据
         try {
             fc.force(false);
         } catch (IOException e) {
@@ -106,7 +107,9 @@ public class TransactionManagerImpl implements TransactionManager {
         }
     }
 
-    // 将XID加一，并更新XID Header
+    /**
+     * 将XID加一，并更新XID文件中Header的数据
+     */
     private void incrXIDCounter() {
         xidCounter ++;
         ByteBuffer buf = ByteBuffer.wrap(Parser.long2Byte(xidCounter));
@@ -123,7 +126,10 @@ public class TransactionManagerImpl implements TransactionManager {
         }
     }
 
-    // 开始一个事务，并返回XID
+    /**
+     * 开始一个新事务，线程安全
+     * @return 返回事务ID
+     */
     public long begin() {
         counterLock.lock();
         try {
@@ -136,17 +142,28 @@ public class TransactionManagerImpl implements TransactionManager {
         }
     }
 
-    // 提交XID事务
+    /**
+     * 提交事务，更新XID文件中对应事务的状态即可
+     * @param xid
+     */
     public void commit(long xid) {
         updateXID(xid, FIELD_TRAN_COMMITTED);
     }
 
-    // 回滚XID事务
+    /**
+     * 回滚事务，更新XID文件中对应事务的状态即可
+     * @param xid
+     */
     public void abort(long xid) {
         updateXID(xid, FIELD_TRAN_ABORTED);
     }
 
-    // 检测XID事务是否处于status状态
+    /**
+     * 检测事务是否处于status状态
+     * @param xid 事务ID
+     * @param status 期望状态
+     * @return
+     */
     private boolean checkXID(long xid, byte status) {
         long offset = getXidPosition(xid);
         ByteBuffer buf = ByteBuffer.wrap(new byte[XID_FIELD_SIZE]);
@@ -174,6 +191,9 @@ public class TransactionManagerImpl implements TransactionManager {
         return checkXID(xid, FIELD_TRAN_ABORTED);
     }
 
+    /**
+     * 关闭事务管理器
+     */
     public void close() {
         try {
             fc.close();
