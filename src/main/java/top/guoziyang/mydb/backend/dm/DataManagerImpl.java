@@ -15,6 +15,29 @@ import top.guoziyang.mydb.backend.utils.Panic;
 import top.guoziyang.mydb.backend.utils.Types;
 import top.guoziyang.mydb.common.Error;
 
+/**
+ * DataManager 是 DM 层直接对外提供方法的类，使用 DataItem 进行数据交互，同时也实现了 DataItem 对象的缓存，靠 UID 查询 DataItem 数据项。
+ * 使用分页进行数据的处理，每个页面里有很多个 DataItem 数据项，也就是先找到数据页，再找到 DataItem 数据项进行读写；
+ * uid 是由页号和页内偏移组成的一个 8 字节无符号整数，页号和偏移各占 4 字节，所以通过 uid 就可以快速定位 DataItem 数据的位置；
+ *      DM向上层提供了三个功能：读、插入和修改。
+ *      修改是通过读出的 DataItem 然后再插入回去实现的，所以 DataManager 只需要提供 read() 和 insert() 方法操作 DataItem 即可
+ *
+ *      read(long uid)：根据 UID 从缓存中获取 DataItem，并校验有效位
+ *      insert(long xid, byte[] data)：在 pageIndex 中获取一个足以存储插入内容的页面的页号，
+ *                                    获取页面后，首先需要写入插入日志，接着才可以通过 pageX 插入数据，并返回插入位置的偏移。
+ *                                    最后需要将页面信息重新插入 pageIndex
+ *
+ *
+ * DM 的所有功能：
+ *      1、初始化校验页面1： initPageOne() 和 启动时候进行校验：loadCheckPageOne()
+ *      2、读取数据 read(long uid)
+ *      3、插入数据 insert(long xid, byte[] data)
+ *      4、实现 DataItem 缓存 重写的两个方法： getForCache(long uid)；releaseForCache(DataItem di)
+ *      5、为 DataItemImpl.after() 提供的记录更新日志方法：logDataItem(long xid, DataItem di)
+ *      6、为 DataItemImpl.release() 提供的释放 DataItem 缓存方法：releaseDataItem(DataItem di)
+ *      7、初始化页面索引：fillPageIndex()
+ *      8、关闭 DM
+ */
 public class DataManagerImpl extends AbstractCache<DataItem> implements DataManager {
 
     TransactionManager tm;
