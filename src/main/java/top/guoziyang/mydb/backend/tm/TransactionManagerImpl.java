@@ -130,6 +130,7 @@ public class TransactionManagerImpl implements TransactionManager {
      * 开始一个新事务，线程安全
      * @return 返回事务ID
      */
+    @Override
     public long begin() {
         counterLock.lock();
         try {
@@ -146,6 +147,7 @@ public class TransactionManagerImpl implements TransactionManager {
      * 提交事务，更新XID文件中对应事务的状态即可
      * @param xid
      */
+    @Override
     public void commit(long xid) {
         updateXID(xid, FIELD_TRAN_COMMITTED);
     }
@@ -154,6 +156,7 @@ public class TransactionManagerImpl implements TransactionManager {
      * 回滚事务，更新XID文件中对应事务的状态即可
      * @param xid
      */
+    @Override
     public void abort(long xid) {
         updateXID(xid, FIELD_TRAN_ABORTED);
     }
@@ -176,16 +179,19 @@ public class TransactionManagerImpl implements TransactionManager {
         return buf.array()[0] == status;
     }
 
+    @Override
     public boolean isActive(long xid) {
         if(xid == SUPER_XID) return false;
         return checkXID(xid, FIELD_TRAN_ACTIVE);
     }
 
+    @Override
     public boolean isCommitted(long xid) {
         if(xid == SUPER_XID) return true;
         return checkXID(xid, FIELD_TRAN_COMMITTED);
     }
 
+    @Override
     public boolean isAborted(long xid) {
         if(xid == SUPER_XID) return false;
         return checkXID(xid, FIELD_TRAN_ABORTED);
@@ -194,6 +200,7 @@ public class TransactionManagerImpl implements TransactionManager {
     /**
      * 关闭事务管理器
      */
+    @Override
     public void close() {
         try {
             fc.close();

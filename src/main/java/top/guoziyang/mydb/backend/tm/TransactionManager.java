@@ -12,7 +12,8 @@ import top.guoziyang.mydb.common.Error;
 
 /**
  * 提供一些接口供其他模块使用
- * 提供两个静态方法 create 和 open，方便创建一个XID文件并开启事务管理模块，或者从已经存在的XID文件开启事务管理模块
+ * 提供两个静态方法 create 和 open，
+ * 方便创建一个XID文件并开启事务管理模块，或者从已经存在的XID文件开启事务管理模块
  */
 public interface TransactionManager {
     long begin();                       // 开启一个新事务，返回事务id
