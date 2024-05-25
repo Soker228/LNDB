@@ -11,7 +11,7 @@ public class PageImpl implements Page {
     private boolean dirty;  // 该页面是否是脏页面，脏页面在缓存释放的时候需要被写回数据源
     private Lock lock;
 
-    private PageCache pc;   // 页面缓存
+    private PageCache pc;   // 页面缓存, PageCache 的引用，为了可以通过 page 方便地对缓存进行操作。
 
     public PageImpl(int pageNumber, byte[] data, PageCache pc) {
         this.pageNumber = pageNumber;

@@ -16,7 +16,7 @@ import top.guoziyang.mydb.common.Error;
 
 /**
  * 页面缓存实现类
- * 继承抽象缓存框架AbstractCache，主要重写getForCache 和 releaseForCache方法
+ * 继承抽象缓存框架 AbstractCache，主要重写 getForCache 和 releaseForCache方法
  * 实现PageCache接口指定的方法
  */
 public class PageCacheImpl extends AbstractCache<Page> implements PageCache {
@@ -32,7 +32,7 @@ public class PageCacheImpl extends AbstractCache<Page> implements PageCache {
 
     PageCacheImpl(RandomAccessFile file, FileChannel fileChannel, int maxResource) {
         super(maxResource);                         // 调用父类的构造函数
-        if(maxResource < MEM_MIN_LIM) {
+        if (maxResource < MEM_MIN_LIM) {
             Panic.panic(Error.MemTooSmallException);
         }
 
@@ -47,50 +47,56 @@ public class PageCacheImpl extends AbstractCache<Page> implements PageCache {
         this.fc = fileChannel;
         this.fileLock = new ReentrantLock();
         // 使用JUC下的原子包Int，使用文件长度计算 页面总数
-        this.pageNumbers = new AtomicInteger((int)length / PAGE_SIZE);
+        this.pageNumbers = new AtomicInteger((int) length / PAGE_SIZE);
     }
 
     /**
      * 将数据打包成一个数据页
      * 调用flush()方法将数据页的内容写入数据源中
+     * pageNumbers 在新建页面时自增。
+     * 其中返回 page 对象时，缓存引用为 null。
+     * flush() 在新建页面时立刻写回磁盘。
+     *
      * @param initData 页面数据
      * @return 页号
      */
     public int newPage(byte[] initData) {
         int pgno = pageNumbers.incrementAndGet();           // 使用原子包将页号 +1
         Page pg = new PageImpl(pgno, initData, null);   // 将initData数据包裹成数据页
-        flush(pg);                                          // 将数据页中的数据写入数据源
+        flush(pg);                                          // 调用flush方法, 将数据页中的数据写入数据源
         return pgno;
     }
 
     /**
-     * 获取指定数据页，调用get()方法
+     * 获取指定数据页，调用 get() 方法, 从缓存中获取 page 对象
+     *
      * @param pgno 页号
      * @return 数据页
      * @throws Exception
      */
     public Page getPage(int pgno) throws Exception {
-        return get((long)pgno);
+        return get((long) pgno);
     }
 
     /**
      * 当资源不在缓存时的获取行为
-     * 根据pageNumber从数据库文件中读取页数据，并包裹成Page
+     * 根据 pageNumber 从数据库文件中读取页数据，并包裹成Page
+     *
      * @param key 页号
      * @return 数据页
      * @throws Exception
      */
     @Override
     protected Page getForCache(long key) throws Exception {
-        int pgno = (int)key;
+        int pgno = (int) key;
         long offset = PageCacheImpl.pageOffset(pgno);       // 计算目标数据页在文件中的偏移量
 
-        ByteBuffer buf = ByteBuffer.allocate(PAGE_SIZE);    // 申请一个页面大小的buffer空间
+        ByteBuffer buf = ByteBuffer.allocate(PAGE_SIZE);    // 申请一个页面大小的 buffer 空间
         fileLock.lock();
         try {
             fc.position(offset);                            // 文件指针移动到数据页的偏移位置
             fc.read(buf);                                   // 读取一个页面的数据
-        } catch(IOException e) {
+        } catch (IOException e) {
             Panic.panic(e);
         }
         fileLock.unlock();
@@ -99,19 +105,21 @@ public class PageCacheImpl extends AbstractCache<Page> implements PageCache {
 
     /**
      * 当资源被驱逐时的写回行为
-     * 调用一个flush()方法将数据页的内容写回数据源
+     * 根据页面是否是脏页面，来决定是否需要写回数据源
+     * 调用一个 flush()方法将数据页的内容写回数据源
+     *
      * @param pg 数据页
      */
     @Override
     protected void releaseForCache(Page pg) {
-        if(pg.isDirty()) {
+        if (pg.isDirty()) {
             flush(pg);
             pg.setDirty(false);
         }
     }
 
     public void release(Page page) {
-        release((long)page.getPageNumber());
+        release((long) page.getPageNumber());
     }
 
     public void flushPage(Page pg) {
@@ -120,6 +128,7 @@ public class PageCacheImpl extends AbstractCache<Page> implements PageCache {
 
     /**
      * 将数据页中的数据写回到数据源文件的规定位置中
+     *
      * @param pg 数据页
      */
     private void flush(Page pg) {
@@ -133,7 +142,7 @@ public class PageCacheImpl extends AbstractCache<Page> implements PageCache {
             fc.position(offset);                            // 指针移动到文件的指定位置
             fc.write(buf);                                  // 写回数据源
             fc.force(false);
-        } catch(IOException e) {
+        } catch (IOException e) {
             Panic.panic(e);
         } finally {
             fileLock.unlock();
@@ -142,6 +151,7 @@ public class PageCacheImpl extends AbstractCache<Page> implements PageCache {
 
     /**
      * 删除maxPgno后面的数据页
+     *
      * @param maxPgno
      */
     public void truncateByBgno(int maxPgno) {
@@ -167,6 +177,7 @@ public class PageCacheImpl extends AbstractCache<Page> implements PageCache {
 
     /**
      * 获取当前数据库文件中的页面总数
+     *
      * @return 页面总数
      */
     public int getPageNumber() {
@@ -175,11 +186,12 @@ public class PageCacheImpl extends AbstractCache<Page> implements PageCache {
 
     /**
      * 计算指定页面的偏移量
+     *
      * @param pgno 页面编号
      * @return 页面的偏移量
      */
     private static long pageOffset(int pgno) {
-        return (pgno-1) * PAGE_SIZE; //  页号从1开始
+        return (pgno - 1) * PAGE_SIZE; //  页号从1开始
     }
 
 }

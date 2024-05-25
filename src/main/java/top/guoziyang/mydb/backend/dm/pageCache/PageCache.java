@@ -24,7 +24,7 @@ public interface PageCache {
     void close();                               // 关闭数据页缓存器
     void release(Page page);                    // 释放一个数据页缓存
 
-    void truncateByBgno(int maxPgno);           // 删除maxPgno后面的数据页
+    void truncateByBgno(int maxPgno);           // 删除 maxPgno 后面的数据页
     int getPageNumber();                        // 获取当前数据库文件的页面总数
     void flushPage(Page pg);                    // 将数据页写入数据源中
 
@@ -47,7 +47,7 @@ public interface PageCache {
             raf = new RandomAccessFile(f, "rw");
             fc = raf.getChannel();
         } catch (FileNotFoundException e) {
-           Panic.panic(e);
+            Panic.panic(e);
         }
         return new PageCacheImpl(raf, fc, (int)memory/PAGE_SIZE);
     }
@@ -67,7 +67,7 @@ public interface PageCache {
             raf = new RandomAccessFile(f, "rw");
             fc = raf.getChannel();
         } catch (FileNotFoundException e) {
-           Panic.panic(e);
+            Panic.panic(e);
         }
         return new PageCacheImpl(raf, fc, (int)memory/PAGE_SIZE);
     }
