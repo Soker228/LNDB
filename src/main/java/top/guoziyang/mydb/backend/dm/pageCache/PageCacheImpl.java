@@ -118,10 +118,17 @@ public class PageCacheImpl extends AbstractCache<Page> implements PageCache {
         }
     }
 
+    /**
+     * 调用 AbstractCache 中的 relsease() 方法释放缓存。
+     * release() 方法会使引用减一，当为 0 时释放。
+     * 又调用了本类中的 releaseForCache() 方法。
+     * @param page
+     */
     public void release(Page page) {
         release((long) page.getPageNumber());
     }
 
+    // 页数据写回磁盘
     public void flushPage(Page pg) {
         flush(pg);
     }
@@ -150,7 +157,8 @@ public class PageCacheImpl extends AbstractCache<Page> implements PageCache {
     }
 
     /**
-     * 删除maxPgno后面的数据页
+     * 删除 maxPgno 后面的数据页
+     * 将文件截断到指定页号（maxPageno参数所指定的页号）的末尾，同时更新页号信息。
      *
      * @param maxPgno
      */
@@ -164,6 +172,7 @@ public class PageCacheImpl extends AbstractCache<Page> implements PageCache {
         pageNumbers.set(maxPgno);
     }
 
+    // 调用上一章中的 close() 方法关闭缓存
     @Override
     public void close() {
         super.close();
