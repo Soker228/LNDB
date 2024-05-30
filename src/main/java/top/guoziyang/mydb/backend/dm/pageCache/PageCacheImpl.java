@@ -17,7 +17,7 @@ import top.guoziyang.mydb.common.Error;
 /**
  * 页面缓存实现类
  * 继承抽象缓存框架 AbstractCache，主要重写 getForCache 和 releaseForCache方法
- * 实现PageCache接口指定的方法
+ * 实现 PageCache 接口指定的方法
  */
 public class PageCacheImpl extends AbstractCache<Page> implements PageCache {
 
