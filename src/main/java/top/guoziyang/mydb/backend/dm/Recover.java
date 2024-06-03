@@ -19,8 +19,15 @@ import top.guoziyang.mydb.backend.tm.TransactionManager;
 import top.guoziyang.mydb.backend.utils.Panic;
 import top.guoziyang.mydb.backend.utils.Parser;
 
+/**
+ * recover 例程主要也是两步：重做所有已完成事务 redo，撤销所有未完成事务undo：
+ * 两个日志格式：
+ *      updateLog:
+ *      [LogType] [XID] [UID] [OldRaw] [NewRaw]
+ *      insertLog:
+ *      [LogType] [XID] [Pgno] [Offset] [Raw]
+ */
 public class Recover {
-
 
     private static final byte LOG_TYPE_INSERT = 0;
     private static final byte LOG_TYPE_UPDATE = 1;
