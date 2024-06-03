@@ -21,6 +21,7 @@ import top.guoziyang.mydb.backend.utils.Parser;
 
 public class Recover {
 
+
     private static final byte LOG_TYPE_INSERT = 0;
     private static final byte LOG_TYPE_UPDATE = 1;
 
