@@ -17,16 +17,22 @@ public interface DataManager {
     long insert(long xid, byte[] data) throws Exception;        // 插入数据
     void close();                                               // 关闭数据管理器
 
+    //从空文件创建首先需要对第一页进行初始化
+    // 静态方法，用于创建DataManager实例
     public static DataManager create(String path, long mem, TransactionManager tm) {
+        // 创建一个PageCache实例，path是文件路径，mem是内存大小
         PageCache pc = PageCache.create(path, mem);             // 新建页面缓存
+        // 创建一个Logger实例，path是文件路径
         Logger lg = Logger.create(path);                        // 新建日志
 
+        // 创建一个DataManagerImpl实例，pc是PageCache实例，lg是Logger实例，tm是TransactionManager实例
         DataManagerImpl dm = new DataManagerImpl(pc, lg, tm);   // 新建数据管理器
         dm.initPageOne();                                       // 初始化校验页面1
-        return dm;
+        return dm;                                              // 返回创建的DataManagerImpl实例
     }
 
 
+    // 静态方法，用于打开已存在的DataManager实例
     public static DataManager open(String path, long mem, TransactionManager tm) {
         PageCache pc = PageCache.open(path, mem);               // 打开页面缓存
         Logger lg = Logger.open(path);                          // 打开日志
