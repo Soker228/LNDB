@@ -29,8 +29,8 @@ public class DataItemImpl implements DataItem {
 
     // 保存了一个 dm 的引用是为了释放 依赖 dm 的缓存（dm 同时实现了缓存接口，用于缓存 DataItem），以及修改数据时记录日志
     private DataManagerImpl dm;
-    private long uid;               // DataItem缓存的key，uid = 页号 + 偏移量
-    private Page pg;                // 数据页
+    private long uid;               // DataItem缓存的key，uid = 页号 + 偏移量  //唯一标识符
+    private Page pg;                // 数据页对象
 
     public DataItemImpl(SubArray raw, byte[] oldRaw, Page pg, long uid, DataManagerImpl dm) {
         this.raw = raw;
@@ -61,17 +61,19 @@ public class DataItemImpl implements DataItem {
      */
     @Override
     public SubArray data() {
+    //    返回的是原始数据的引用，而不是数据的拷贝
         return new SubArray(raw.raw, raw.start + OF_DATA, raw.end);
     }
 
     /**
-     * 修改数据之前的操作
+     * 修改数据之前的操作, 用于锁定数据项并保存原始数据
      * 包含了加写锁，设置脏页面，暂存需要修改的数据内容到oldRaw
      */
     @Override
     public void before() {
         wLock.lock();
         pg.setDirty(true);
+        //保存原始数据的副本，以便在需要时进行回滚
         System.arraycopy(raw.raw, raw.start, oldRaw, 0, oldRaw.length);
     }
 
