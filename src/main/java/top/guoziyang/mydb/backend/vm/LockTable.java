@@ -11,16 +11,19 @@ import java.util.concurrent.locks.ReentrantLock;
 import top.guoziyang.mydb.common.Error;
 
 /**
+ * 表锁：
  * 维护了一个依赖等待图，以进行死锁检测
  */
 public class LockTable {
-    
+
     private Map<Long, List<Long>> x2u;  // 某个XID已经获得的资源的UID列表
     private Map<Long, Long> u2x;        // UID被某个XID持有
     private Map<Long, List<Long>> wait; // 正在等待UID的XID列表
     private Map<Long, Lock> waitLock;   // 正在等待资源的XID的锁
     private Map<Long, Long> waitU;      // XID正在等待的UID
     private Lock lock;
+    private Map<Long, Integer> xidStamp;
+    private int stamp;
 
     public LockTable() {
         x2u = new HashMap<>();
@@ -31,11 +34,18 @@ public class LockTable {
         lock = new ReentrantLock();
     }
 
-    // 不需要等待则返回null，否则返回锁对象
-    // 会造成死锁则抛出异常
+    /**
+     * 向依赖等待图中添加一个等待记录
+     * 事务xid 阻塞等待 数据项uid，如果会造成死锁则抛出异常
+     * @param xid 事务id
+     * @param uid 数据项key
+     * @return 不需要等待则返回null，否则返回锁对象
+     * @throws Exception
+     */
     public Lock add(long xid, long uid) throws Exception {
         lock.lock();
         try {
+            // dataitem数据已经被事务xid获取到，不需要等待，返回null
             if(isInList(x2u, xid, uid)) {
                 return null;
             }
@@ -45,8 +55,7 @@ public class LockTable {
                 return null;
             }
             waitU.put(xid, uid);
-            //putIntoList(wait, xid, uid);
-            putIntoList(wait, uid, xid);
+            putIntoList(wait, xid, uid);
             if(hasDeadLock()) {
                 waitU.remove(xid);
                 removeFromList(wait, uid, xid);
@@ -62,6 +71,10 @@ public class LockTable {
         }
     }
 
+    /**
+     *
+     * @param xid
+     */
     public void remove(long xid) {
         lock.lock();
         try {
@@ -104,9 +117,7 @@ public class LockTable {
         if(l.size() == 0) wait.remove(uid);
     }
 
-    private Map<Long, Integer> xidStamp;
-    private int stamp;
-
+    // 死锁检测
     private boolean hasDeadLock() {
         xidStamp = new HashMap<>();
         stamp = 1;
@@ -115,7 +126,7 @@ public class LockTable {
             if(s != null && s > 0) {
                 continue;
             }
-            stamp ++;
+            stamp++;
             if(dfs(xid)) {
                 return true;
             }
