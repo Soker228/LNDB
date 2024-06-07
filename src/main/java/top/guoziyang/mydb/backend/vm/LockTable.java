@@ -95,36 +95,38 @@ public class LockTable {
                     selectNewXID(uid);              // 从等待队列中选择一个新的事务ID来占用这个资源
                 }
             }
-            waitU.remove(xid);
-            x2u.remove(xid);
-            waitLock.remove(xid);
+            waitU.remove(xid);                      // 从waitU映射中移除当前事务ID
+            x2u.remove(xid);                        // 从x2u映射中移除当前事务ID
+            waitLock.remove(xid);                   // 从waitLock映射中移除当前事务ID
 
         } finally {
-            lock.unlock();
+            lock.unlock();                          // 解锁全局锁
         }
     }
 
     // 从等待队列中选择一个xid来占用uid
     private void selectNewXID(long uid) {
-        u2x.remove(uid);
-        List<Long> l = wait.get(uid);
-        if(l == null) return;
-        assert l.size() > 0;
+        u2x.remove(uid);                            // 从u2x映射中移除当前资源ID
+        List<Long> l = wait.get(uid);               // 从wait映射中获取当前资源ID的等待队列
+        if (l == null) return;                      // 如果等待队列为空，立即返回
+        assert l.size() > 0;                        // 断言等待队列不为空
 
-        while(l.size() > 0) {
-            long xid = l.remove(0);
-            if(!waitLock.containsKey(xid)) {
-                continue;
+        // 遍历等待队列
+        while (l.size() > 0) {
+            long xid = l.remove(0);          // 获取并移除队列中的第一个事务ID
+            // 检查事务ID是否在waitLock映射中
+            if (!waitLock.containsKey(xid)) {
+                continue;                          // 如果不在，跳过这个事务ID，继续下一个
             } else {
-                u2x.put(uid, xid);
-                Lock lo = waitLock.remove(xid);
-                waitU.remove(xid);
-                lo.unlock();
-                break;
+                u2x.put(uid, xid);                  // 将事务ID和资源ID添加到u2x映射中
+                Lock lo = waitLock.remove(xid);     // 从waitLock映射中移除这个事务ID
+                waitU.remove(xid);                  // 从waitU映射中移除这个事务ID
+                lo.unlock();                        // 解锁这个事务ID的锁
+                break;                              // 跳出循环
             }
         }
-
-        if(l.size() == 0) wait.remove(uid);
+        // 如果等待队列为空，从wait映射中移除当前资源ID
+        if (l.size() == 0) wait.remove(uid);
     }
 
     // 死锁检测
