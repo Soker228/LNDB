@@ -15,12 +15,23 @@ import top.guoziyang.mydb.backend.im.Node.SearchNextRes;
 import top.guoziyang.mydb.backend.tm.TransactionManagerImpl;
 import top.guoziyang.mydb.backend.utils.Parser;
 
+/**
+ * B+ 树索引
+ * IM 对上层模块主要提供两种能力：插入索引 和 搜索节点。
+ */
 public class BPlusTree {
     DataManager dm;
     long bootUid;
-    DataItem bootDataItem;
     Lock bootLock;
+    // 由于 B+ 树在插入删除时，会动态调整，根节点不是固定节点，于是设置一个 bootDataItem，该 DataItem 中存储了根节点的 UID。
+    DataItem bootDataItem;
 
+    /**
+     *
+     * @param dm
+     * @return
+     * @throws Exception
+     */
     public static long create(DataManager dm) throws Exception {
         byte[] rawRoot = Node.newNilRootRaw();
         long rootUid = dm.insert(TransactionManagerImpl.SUPER_XID, rawRoot);
@@ -75,11 +86,14 @@ public class BPlusTree {
         }
     }
 
+    /*
+     * serchNext()方法是在索引树上寻找下一个孩子结点，无限循环直到走到叶子结点为止；这个结点没有符合要求的就去下一个兄弟结点找
+     */
     private long searchNext(long nodeUid, long key) throws Exception {
         while(true) {
             Node node = Node.loadNode(this, nodeUid);
             SearchNextRes res = node.searchNext(key);
-            node.release();
+            node.release(); // 释放缓存
             if(res.uid != 0) return res.uid;
             nodeUid = res.siblingUid;
         }
@@ -120,6 +134,11 @@ public class BPlusTree {
         long newNode, newKey;
     }
 
+    /*
+     * 插入结点：
+     * 先找到插入位置，也就是要递归到叶子结点为止才会真正插入
+     * 期间一直在B+树上面靠serchNext()往下走索引树，serchNext()方法就是寻找下一个孩子结点的uid
+     */
     private InsertRes insert(long nodeUid, long uid, long key) throws Exception {
         Node node = Node.loadNode(this, nodeUid);
         boolean isLeaf = node.isLeaf();

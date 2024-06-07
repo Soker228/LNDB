@@ -3,6 +3,7 @@ package top.guoziyang.mydb.backend.vm;
 import top.guoziyang.mydb.backend.dm.DataManager;
 import top.guoziyang.mydb.backend.tm.TransactionManager;
 
+// VM 层通过 VersionManager 接口，向上层提供功能
 public interface VersionManager {
     // 数据版本链管理
     byte[] read(long xid, long uid) throws Exception;       // 保证可见性的条件下，读取数据DataItem
