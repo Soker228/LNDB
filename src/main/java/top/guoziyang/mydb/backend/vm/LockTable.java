@@ -129,36 +129,36 @@ public class LockTable {
 
     // 死锁检测
     private boolean hasDeadLock() {
-        xidStamp = new HashMap<>();
+        xidStamp = new HashMap<>();                  // 创建一个新的xidStamp哈希映射
         stamp = 1;
-        for(long xid : x2u.keySet()) {
-            Integer s = xidStamp.get(xid);
-            if(s != null && s > 0) {
-                continue;
+        for(long xid : x2u.keySet()) {               // 遍历所有已经获得资源的事务ID
+            Integer s = xidStamp.get(xid);           // 获取xidStamp中对应事务ID的记录
+            if(s != null && s > 0) {                 // 如果记录存在，并且值大于0
+                continue;                            // 跳过这个事务ID，继续下一个
             }
             stamp++;
-            if(dfs(xid)) {
-                return true;
+            if(dfs(xid)) {                           // 调用dfs方法进行深度优先搜索
+                return true;                         // 如果dfs方法返回true，表示存在死锁，那么hasDeadLock方法也返回true
             }
         }
         return false;
     }
 
     private boolean dfs(long xid) {
-        Integer stp = xidStamp.get(xid);
-        if(stp != null && stp == stamp) {
-            return true;
+        Integer stp = xidStamp.get(xid);            // 从xidStamp映射中获取当前事务ID的时间戳
+        if(stp != null && stp == stamp) {           // 如果时间戳存在并且等于全局时间戳
+            return true;                            // 存在死锁，返回true
         }
-        if(stp != null && stp < stamp) {
-            return false;
+        if(stp != null && stp < stamp) {            // 如果时间戳存在并且小于全局时间戳
+            return false;                           // 这个事务ID已经被检查过，并且没有发现死锁，返回false
         }
-        xidStamp.put(xid, stamp);
+        xidStamp.put(xid, stamp);                   // 将当前事务ID和全局时间戳添加到xidStamp映射中
 
-        Long uid = waitU.get(xid);
-        if(uid == null) return false;
-        Long x = u2x.get(uid);
-        assert x != null;
-        return dfs(x);
+        Long uid = waitU.get(xid);                  // 从waitU映射中获取当前事务ID正在等待的资源ID
+        if (uid == null) return false;              // 如果资源ID不存在，表示当前事务ID不在等待任何资源，返回false
+        Long x = u2x.get(uid);                      // 从u2x映射中获取当前资源ID被哪个事务ID持有
+        assert x != null;                           // 断言这个事务ID存在
+        return dfs(x);                              // 递归调用dfs方法检查这个事务ID
     }
 
     private void removeFromList(Map<Long, List<Long>> listMap, long uid0, long uid1) {
