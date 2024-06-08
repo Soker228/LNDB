@@ -9,7 +9,7 @@ import java.nio.file.StandardCopyOption;
 import top.guoziyang.mydb.backend.utils.Panic;
 import top.guoziyang.mydb.common.Error;
 
-// 记录第一个表的uid
+// 使用Booter类和bt文件来管理数据库的启动信息：第一个表的Uid
 public class Booter {
     public static final String BOOTER_SUFFIX = ".bt";
     public static final String BOOTER_TMP_SUFFIX = ".bt_tmp";
@@ -54,6 +54,7 @@ public class Booter {
         this.file = file;
     }
 
+    // 读取启动信息
     public byte[] load() {
         byte[] buf = null;
         try {
@@ -64,6 +65,7 @@ public class Booter {
         return buf;
     }
 
+    // 更新启动信息
     public void update(byte[] data) {
         File tmp = new File(path + BOOTER_TMP_SUFFIX);
         try {
