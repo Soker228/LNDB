@@ -82,6 +82,7 @@ public class Field {
         return f;
     }
 
+    // 创建一个字段，通过VM插入进行持久化
     private void persistSelf(long xid) throws Exception {
         byte[] nameRaw = Parser.string2Byte(fieldName);
         byte[] typeRaw = Parser.string2Byte(fieldType);
@@ -104,6 +105,7 @@ public class Field {
         bt.insert(uKey, uid);
     }
 
+    // 通过B+树索引进行搜索字段
     public List<Long> search(long left, long right) throws Exception {
         return bt.searchRange(left, right);
     }
@@ -196,14 +198,15 @@ public class Field {
     @Override
     public String toString() {
         return new StringBuilder("(")
-            .append(fieldName)
-            .append(", ")
-            .append(fieldType)
-            .append(index!=0?", Index":", NoIndex")
-            .append(")")
-            .toString();
+                .append(fieldName)
+                .append(", ")
+                .append(fieldType)
+                .append(index!=0?", Index":", NoIndex")
+                .append(")")
+                .toString();
     }
 
+    // 计算Where语句的范围
     public FieldCalRes calExp(SingleExpression exp) throws Exception {
         Object v = null;
         FieldCalRes res = new FieldCalRes();
