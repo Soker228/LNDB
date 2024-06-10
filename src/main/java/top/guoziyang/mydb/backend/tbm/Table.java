@@ -26,17 +26,21 @@ import top.guoziyang.mydb.common.Error;
  * 二进制结构如下：
  * [TableName][NextTable]
  * [Field1Uid][Field2Uid]...[FieldNUid]
+ *
+ * 一个数据库中存在多张表，TBM 使用链表的形式将其组织起来，每一张表都保存一个指向下一张表的 UID。
  */
 public class Table {
-    TableManager tbm;
-    long uid;
-    String name;
-    byte status;
-    long nextUid;
-    List<Field> fields = new ArrayList<>();
+    TableManager tbm; // 表管理器，用于管理数据库表
+    long uid; // 表的唯一标识符
+    String name; // 表的名称
+    byte status; // 表的状态
+    long nextUid; // 下一个表的唯一标识符
+    List<Field> fields = new ArrayList<>(); // 表的字段列表
 
+    // 读取一张表
     public static Table loadTable(TableManager tbm, long uid) {
         byte[] raw = null;
+        // 先通过VM读取表头UID的Entry
         try {
             raw = ((TableManagerImpl)tbm).vm.read(TransactionManagerImpl.SUPER_XID, uid);
         } catch (Exception e) {
@@ -76,6 +80,7 @@ public class Table {
         this.nextUid = nextUid;
     }
 
+    //
     private Table parseSelf(byte[] raw) {
         int position = 0;
         ParseStringRes res = Parser.parseString(raw);
@@ -138,7 +143,7 @@ public class Table {
             entry.put(fd.fieldName, value);
             raw = entry2Raw(entry);
             long uuid = ((TableManagerImpl)tbm).vm.insert(xid, raw);
-            
+
             count ++;
 
             for (Field field : fields) {
@@ -151,10 +156,10 @@ public class Table {
     }
 
     public String read(long xid, Select read) throws Exception {
-        List<Long> uids = parseWhere(read.where);
+        List<Long> uids = parseWhere(read.where);                   // IM查找索引解析Where语句
         StringBuilder sb = new StringBuilder();
         for (Long uid : uids) {
-            byte[] raw = ((TableManagerImpl)tbm).vm.read(xid, uid);
+            byte[] raw = ((TableManagerImpl)tbm).vm.read(xid, uid); // 通过VM去读一个Entry记录
             if(raw == null) continue;
             Map<String, Object> entry = parseEntry(raw);
             sb.append(printEntry(entry)).append("\n");
