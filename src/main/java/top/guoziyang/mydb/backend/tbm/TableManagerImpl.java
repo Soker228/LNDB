@@ -22,10 +22,10 @@ public class TableManagerImpl implements TableManager {
     VersionManager vm;
     DataManager dm;
     private Booter booter;
-    private Map<String, Table> tableCache;
-    private Map<Long, List<Table>> xidTableCache;
+    private Map<String, Table> tableCache;          // 表的缓存，key：表名；value：表
+    private Map<Long, List<Table>> xidTableCache;   // 记录每个事务正在操作的表
     private Lock lock;
-    
+
     TableManagerImpl(VersionManager vm, DataManager dm, Booter booter) {
         this.vm = vm;
         this.dm = dm;
@@ -37,7 +37,7 @@ public class TableManagerImpl implements TableManager {
     }
 
     private void loadTables() {
-        long uid = firstTableUid();
+        long uid = firstTableUid(); // 获取第一张表的Uid
         while(uid != 0) {
             Table tb = Table.loadTable(this, uid);
             uid = tb.nextUid;
@@ -58,9 +58,9 @@ public class TableManagerImpl implements TableManager {
     @Override
     public BeginRes begin(Begin begin) {
         BeginRes res = new BeginRes();
-        int level = begin.isRepeatableRead?1:0;
-        res.xid = vm.begin(level);
-        res.result = "begin".getBytes();
+        int level = begin.isRepeatableRead?1:0; // 隔离等级
+        res.xid = vm.begin(level);              // 通过VM开始一个新事务，返回事务ID
+        res.result = "begin".getBytes();        // 记录执行语句
         return res;
     }
     @Override
@@ -93,10 +93,12 @@ public class TableManagerImpl implements TableManager {
             lock.unlock();
         }
     }
+
     @Override
     public byte[] create(long xid, Create create) throws Exception {
         lock.lock();
         try {
+            // 表已经存在
             if(tableCache.containsKey(create.tableName)) {
                 throw Error.DuplicatedTableException;
             }
