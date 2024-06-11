@@ -2,11 +2,15 @@ package top.guoziyang.mydb.backend.parser;
 
 import top.guoziyang.mydb.common.Error;
 
+/**
+ * 对语句进行逐字节解析，根据空白符或者上述词法规则，将语句切割成多个 token。
+ * 对外提供了 peek()、pop() 方法方便取出 Token 进行解析。切割的实现不赘述。
+ */
 public class Tokenizer {
-    private byte[] stat;
-    private int pos;
-    private String currentToken;
-    private boolean flushToken;
+    private byte[] stat;            // 需要解析的字段
+    private int pos;                // 指向token的指针
+    private String currentToken;    // 当前Token，如果没有pop()，peek()的时候直接返回currentToken即可
+    private boolean flushToken;     // 送出token的一个标记，用于调用pop()的标记，防止peek重复读取token
     private Exception err;
 
     public Tokenizer(byte[] stat) {
@@ -34,10 +38,12 @@ public class Tokenizer {
         return currentToken;
     }
 
+    // 先peek()，再pop()
     public void pop() {
         flushToken = true;
     }
 
+    // 返回错误的语句，格式就是在正确语句与错误语句之间插入 "<<"
     public byte[] errStat() {
         byte[] res = new byte[stat.length+3];
         System.arraycopy(stat, 0, res, 0, pos);
@@ -46,8 +52,9 @@ public class Tokenizer {
         return res;
     }
 
+    // 弹出一个字节，无返回值，需要先使用peekByte()
     private void popByte() {
-        pos ++;
+        pos++;
         if(pos > stat.length) {
             pos = stat.length;
         }
@@ -115,6 +122,11 @@ public class Tokenizer {
         return ((b >= 'a' && b <= 'z') || (b >= 'A' && b <= 'Z'));
     }
 
+    /**
+     * 下一个引用状态
+     * @return
+     * @throws Exception
+     */
     private String nextQuoteState() throws Exception {
         byte quote = peekByte();
         popByte();
@@ -137,7 +149,7 @@ public class Tokenizer {
 
     static boolean isSymbol(byte b) {
         return (b == '>' || b == '<' || b == '=' || b == '*' ||
-		b == ',' || b == '(' || b == ')');
+                b == ',' || b == '(' || b == ')');
     }
 
     static boolean isBlank(byte b) {

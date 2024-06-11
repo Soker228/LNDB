@@ -17,6 +17,11 @@ import top.guoziyang.mydb.backend.parser.statement.Update;
 import top.guoziyang.mydb.backend.parser.statement.Where;
 import top.guoziyang.mydb.common.Error;
 
+/**
+ * Parser 类则直接对外提供了 Parse(byte[] statement) 方法，
+ * 核心就是一个调用 Tokenizer 类分割 Token，并根据词法规则包装成具体的 Statement 类并返回。
+ * 解析过程很简单，仅仅是根据第一个 Token 来区分语句类型，并分别处理
+ */
 public class Parser {
     public static Object Parse(byte[] statement) throws Exception {
         Tokenizer tokenizer = new Tokenizer(statement);
@@ -65,6 +70,7 @@ public class Parser {
         }
         try {
             String next = tokenizer.peek();
+            // 格式错误，没有使用空格分开
             if(!"".equals(next)) {
                 byte[] errStat = tokenizer.errStat();
                 statErr = new RuntimeException("Invalid statement: " + new String(errStat));
@@ -252,7 +258,7 @@ public class Parser {
 
     private static SingleExpression parseSingleExp(Tokenizer tokenizer) throws Exception {
         SingleExpression exp = new SingleExpression();
-        
+
         String field = tokenizer.peek();
         if(!isName(field)) {
             throw Error.InvalidCommandException;
@@ -295,7 +301,7 @@ public class Parser {
         if(!"".equals(tokenizer.peek())) {
             throw Error.InvalidCommandException;
         }
-        
+
         Drop drop = new Drop();
         drop.tableName = tableName;
         return drop;
@@ -335,7 +341,7 @@ public class Parser {
             fNames.add(field);
             fTypes.add(fieldType);
             tokenizer.pop();
-            
+
             String next = tokenizer.peek();
             if(",".equals(next)) {
                 continue;
@@ -379,7 +385,7 @@ public class Parser {
 
     private static boolean isType(String tp) {
         return ("int32".equals(tp) || "int64".equals(tp) ||
-        "string".equals(tp));
+                "string".equals(tp));
     }
 
     private static Abort parseAbort(Tokenizer tokenizer) throws Exception {
