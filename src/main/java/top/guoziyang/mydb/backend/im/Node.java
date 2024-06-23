@@ -24,6 +24,7 @@ import top.guoziyang.mydb.backend.utils.Parser;
  * serchNext(...) ：提供给B+树的底层搜索方法，就是一颗多叉搜索树二分搜索算法，目标值小于当前节点值的走左孩子，大于等于的继续for，这个节点都没找到满足要求的就去下一个兄弟节点找
  * serchRange()：提供给B+树的底层范围搜索方法。
  */
+
 public class Node {
     // 节点头部信息偏移量
     static final int IS_LEAF_OFFSET = 0;                        // LeafFlag 起始地址
