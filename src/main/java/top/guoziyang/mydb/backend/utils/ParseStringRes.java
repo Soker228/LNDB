@@ -1,5 +1,6 @@
 package top.guoziyang.mydb.backend.utils;
 
+
 public class ParseStringRes {
     public String str;
     public int next;
