@@ -49,6 +49,7 @@ public class Booter {
         new File(path+BOOTER_TMP_SUFFIX).delete();
     }
 
+
     private Booter(String path, File file) {
         this.path = path;
         this.file = file;
