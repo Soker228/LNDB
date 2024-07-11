@@ -66,7 +66,6 @@ public class Booter {
         return buf;
     }
 
-
     // 更新启动信息
     public void update(byte[] data) {
         File tmp = new File(path + BOOTER_TMP_SUFFIX);
