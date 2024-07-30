@@ -2,6 +2,7 @@ package top.guoziyang.mydb.client;
 
 import java.util.Scanner;
 
+// 读取用户的输入，并调用client.execute()，执行语句，关闭退出等
 public class Shell {
     private Client client;
 
