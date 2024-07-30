@@ -10,6 +10,11 @@ import java.net.Socket;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 
+/**
+ * 编码之后的信息会通过 Transporter 类，写入输出流发送出去。
+ * 为了避免特殊字符造成问题，这里会将数据转成十六进制字符串（Hex String），并为信息末尾加上换行符。
+ * 这样在发送和接收数据时，就可以很简单地使用 BufferedReader 和 BufferedWriter 来直接按行读写了。
+ */
 public class Transporter {
     private Socket socket;
     private BufferedReader reader;
@@ -41,6 +46,7 @@ public class Transporter {
         socket.close();
     }
 
+    // 将数据转成十六进制字符串（Hex String），并为信息末尾加上换行符
     private String hexEncode(byte[] buf) {
         return Hex.encodeHexString(buf, true)+"\n";
     }

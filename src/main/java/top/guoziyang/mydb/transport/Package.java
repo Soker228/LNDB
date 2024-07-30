@@ -1,7 +1,8 @@
 package top.guoziyang.mydb.transport;
 
+// 将sql语句和错误一起打包
 public class Package {
-    byte[] data;
+    byte[] data;    // sql语句
     Exception err;
 
     public Package(byte[] data, Exception err) {
