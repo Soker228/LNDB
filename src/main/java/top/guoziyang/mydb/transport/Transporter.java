@@ -28,9 +28,9 @@ public class Transporter {
     }
 
     public void send(byte[] data) throws Exception {
-        String raw = hexEncode(data);
-        writer.write(raw);
-        writer.flush();
+        String raw = hexEncode(data); //对字节数组进行16进制编码
+        writer.write(raw);  //将编码后的字符串写入输出流
+        writer.flush();     // 强制将缓冲区的数据写出
     }
 
     public byte[] receive() throws Exception {
