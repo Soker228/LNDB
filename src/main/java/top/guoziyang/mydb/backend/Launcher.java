@@ -15,14 +15,16 @@ import top.guoziyang.mydb.backend.vm.VersionManager;
 import top.guoziyang.mydb.backend.vm.VersionManagerImpl;
 import top.guoziyang.mydb.common.Error;
 
+// 服务器的启动入口。这个类解析了命令行参数。很重要的参数就是 -open 或者 -create。
+// Launcher 根据两个参数，来决定是创建数据库文件，还是启动一个已有的数据库。
 public class Launcher {
 
     public static final int port = 9999;
 
     public static final long DEFALUT_MEM = (1<<20)*64;
     public static final long KB = 1 << 10;
-	public static final long MB = 1 << 20;
-	public static final long GB = 1 << 30;
+    public static final long MB = 1 << 20;
+    public static final long GB = 1 << 30;
 
     public static void main(String[] args) throws ParseException {
         Options options = new Options();
@@ -43,21 +45,23 @@ public class Launcher {
         System.out.println("Usage: launcher (open|create) DBPath");
     }
 
+    // 创建数据库文件
     private static void createDB(String path) {
-        TransactionManager tm = TransactionManager.create(path);
-        DataManager dm = DataManager.create(path, DEFALUT_MEM, tm);
-        VersionManager vm = new VersionManagerImpl(tm, dm);
-        TableManager.create(path, vm, dm);
+        TransactionManager tm = TransactionManager.create(path);    // 新建tm
+        DataManager dm = DataManager.create(path, DEFALUT_MEM, tm); // 新建dm
+        VersionManager vm = new VersionManagerImpl(tm, dm);         // 新建vm
+        TableManager.create(path, vm, dm);                          // 新建tbm
         tm.close();
         dm.close();
     }
 
+    // 开启数据库文件
     private static void openDB(String path, long mem) {
-        TransactionManager tm = TransactionManager.open(path);
-        DataManager dm = DataManager.open(path, mem, tm);
-        VersionManager vm = new VersionManagerImpl(tm, dm);
-        TableManager tbm = TableManager.open(path, vm, dm);
-        new Server(port, tbm).start();
+        TransactionManager tm = TransactionManager.open(path);      // 打开tm
+        DataManager dm = DataManager.open(path, mem, tm);           // 打开dm
+        VersionManager vm = new VersionManagerImpl(tm, dm);         // 打开vm
+        TableManager tbm = TableManager.open(path, vm, dm);         // 打开tbm
+        new Server(port, tbm).start();                              // 打开sql服务器
     }
 
     private static long parseMem(String memStr) {
