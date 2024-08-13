@@ -86,7 +86,7 @@ public class DataManagerImpl extends AbstractCache<DataItem> implements DataMana
      */
     @Override
     public long insert(long xid, byte[] data) throws Exception {
-        // 将数据打包为DataItem格式
+        // 将数据打包为 DataItem 格式
         byte[] raw = DataItem.wrapDataItemRaw(data);
         if (raw.length > PageX.MAX_FREE_SPACE) {
             throw Error.DataTooLargeException;

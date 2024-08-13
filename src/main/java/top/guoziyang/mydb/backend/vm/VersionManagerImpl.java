@@ -48,6 +48,7 @@ public class VersionManagerImpl extends AbstractCache<Entry> implements VersionM
         }
 
         Entry entry = null;
+
         try {
             entry = super.get(uid);
         } catch(Exception e) {
@@ -57,6 +58,7 @@ public class VersionManagerImpl extends AbstractCache<Entry> implements VersionM
                 throw e;
             }
         }
+
         try {
             if(Visibility.isVisible(tm, t, entry)) {
                 return entry.data();
@@ -67,6 +69,7 @@ public class VersionManagerImpl extends AbstractCache<Entry> implements VersionM
             entry.release();
         }
     }
+
 
     /**
      * 插入数据，将数据包裹成entry，交给DM进行插入即可

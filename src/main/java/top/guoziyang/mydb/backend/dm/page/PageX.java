@@ -14,7 +14,7 @@ import top.guoziyang.mydb.backend.utils.Parser;
  * 普通页结构
  * [FreeSpaceOffset] [Data]
  * FreeSpaceOffset: 2字节 空闲位置开始偏移
- * Data: 由于都是使用DataItem进行数据操作，索引Data的格式就是DataItem的格式：[ValidFlag] [DataSize] [Data]
+ * Data: 由于都是使用DataItem进行数据操作，所以Data的格式就是DataItem的格式：[ValidFlag] [DataSize] [Data]
  */
 public class PageX {
 
