@@ -20,11 +20,17 @@ import top.guoziyang.mydb.common.Error;
  * 如果field无索引，IndexUid为0
  */
 public class Field {
+    // 唯一标识符，用于标识每个Field对象
     long uid;
+    // Field对象所属的表
     private Table tb;
+    // 字段名，用于标识表中的每个字段
     String fieldName;
+    // 字段类型，用于标识字段的数据类型
     String fieldType;
+    // 索引，用于标识字段是否有索引，如果索引为0，表示没有索引
     private long index;
+    // B+树，用于存储索引，如果字段有索引，这个B+树会被加载
     private BPlusTree bt;
 
     public static Field loadField(Table tb, long uid) {
