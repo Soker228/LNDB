@@ -33,14 +33,21 @@ public class Field {
     // B+树，用于存储索引，如果字段有索引，这个B+树会被加载
     private BPlusTree bt;
 
+    /**
+     * 从持久化存储中加载一个Field对象。
+     */
     public static Field loadField(Table tb, long uid) {
-        byte[] raw = null;
+        byte[] raw = null;  // 用于存储从持久化存储中读取的原始字节数据
         try {
-            raw = ((TableManagerImpl)tb.tbm).vm.read(TransactionManagerImpl.SUPER_XID, uid);
+            // 从持久化存储中读取uid对应的原始字节数据
+            raw = ((TableManagerImpl) tb.tbm).vm.read(TransactionManagerImpl.SUPER_XID, uid);
         } catch (Exception e) {
+            // 如果读取过程中出现异常，调用Panic.panic方法处理异常
             Panic.panic(e);
         }
+        // 断言原始字节数据不为null，如果为null，那么会抛出AssertionError
         assert raw != null;
+        // 创建一个新的Field对象，并调用parseSelf方法解析原始字节数据
         return new Field(uid, tb).parseSelf(raw);
     }
 
