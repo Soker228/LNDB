@@ -33,6 +33,20 @@ public class Field {
     // B+树，用于存储索引，如果字段有索引，这个B+树会被加载
     private BPlusTree bt;
 
+
+
+    public Field(long uid, Table tb) {
+        this.uid = uid;
+        this.tb = tb;
+    }
+
+    public Field(Table tb, String fieldName, String fieldType, long index) {
+        this.tb = tb;
+        this.fieldName = fieldName;
+        this.fieldType = fieldType;
+        this.index = index;
+    }
+
     /**
      * 从持久化存储中加载一个Field对象。
      */
@@ -49,18 +63,6 @@ public class Field {
         assert raw != null;
         // 创建一个新的Field对象，并调用parseSelf方法解析原始字节数据
         return new Field(uid, tb).parseSelf(raw);
-    }
-
-    public Field(long uid, Table tb) {
-        this.uid = uid;
-        this.tb = tb;
-    }
-
-    public Field(Table tb, String fieldName, String fieldType, long index) {
-        this.tb = tb;
-        this.fieldName = fieldName;
-        this.fieldType = fieldType;
-        this.index = index;
     }
 
     private Field parseSelf(byte[] raw) {
