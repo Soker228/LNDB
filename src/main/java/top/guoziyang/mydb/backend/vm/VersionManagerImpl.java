@@ -50,7 +50,7 @@ public class VersionManagerImpl extends AbstractCache<Entry> implements VersionM
         Entry entry = null;
 
         try {
-            entry = super.get(uid);
+            entry = super.get(uid);     //根据 uid 得到 entry
         } catch(Exception e) {
             if(e == Error.NullEntryException) {
                 return null;
@@ -58,7 +58,7 @@ public class VersionManagerImpl extends AbstractCache<Entry> implements VersionM
                 throw e;
             }
         }
-
+        //判断该条entry的版本可见性
         try {
             if(Visibility.isVisible(tm, t, entry)) {
                 return entry.data();

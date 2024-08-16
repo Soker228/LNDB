@@ -15,6 +15,8 @@ import top.guoziyang.mydb.backend.im.Node.SearchNextRes;
 import top.guoziyang.mydb.backend.tm.TransactionManagerImpl;
 import top.guoziyang.mydb.backend.utils.Parser;
 
+import javax.swing.undo.UndoableEdit;
+
 /**
  * B+ 树索引
  * IM 对上层模块主要提供两种能力：插入索引 和 搜索节点。

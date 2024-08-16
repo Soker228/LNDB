@@ -158,10 +158,10 @@ public class Table {
     }
 
     public String read(long xid, Select read) throws Exception {
-        List<Long> uids = parseWhere(read.where);                   // IM查找索引解析Where语句
+        List<Long> uids = parseWhere(read.where);                   // IM查找索引解析Where语句,会返回地址（uid）集合，所有符合where查询条件的
         StringBuilder sb = new StringBuilder();
         for (Long uid : uids) {
-            byte[] raw = ((TableManagerImpl)tbm).vm.read(xid, uid); // 通过VM去读一个Entry记录
+            byte[] raw = ((TableManagerImpl)tbm).vm.read(xid, uid); // 通过VM去读一个Entry记录，检查版本可见性
             if(raw == null) continue;
             Map<String, Object> entry = parseEntry(raw);
             sb.append(printEntry(entry)).append("\n");

@@ -15,6 +15,8 @@ import top.guoziyang.mydb.backend.vm.VersionManager;
 import top.guoziyang.mydb.backend.vm.VersionManagerImpl;
 import top.guoziyang.mydb.common.Error;
 
+import java.util.Scanner;
+
 // 服务器的启动入口。这个类解析了命令行参数。很重要的参数就是 -open 或者 -create。
 // Launcher 根据两个参数，来决定是创建数据库文件，还是启动一个已有的数据库。
 public class Launcher {
@@ -34,14 +36,29 @@ public class Launcher {
         CommandLineParser parser = new DefaultParser();
         CommandLine cmd = parser.parse(options,args);
 
-        if(cmd.hasOption("open")) {
-            openDB(cmd.getOptionValue("open"), parseMem(cmd.getOptionValue("mem")));
+        // debug用 begin
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("请输入操作选项（open/create）:");
+        String option = scanner.nextLine();
+
+        if ("open".equalsIgnoreCase(option)) {
+            System.out.println("请输入数据库路径:");
+            String dbPath = scanner.nextLine();
+
+            String mem = "";
+            openDB(dbPath, parseMem(mem));
             return;
         }
-        if(cmd.hasOption("create")) {
-            createDB(cmd.getOptionValue("create"));
-            return;
-        }
+        //debug用 end
+
+//        if(cmd.hasOption("open")) {
+//            openDB(cmd.getOptionValue("open"), parseMem(cmd.getOptionValue("mem")));
+//            return;
+//        }
+//        if(cmd.hasOption("create")) {
+//            createDB(cmd.getOptionValue("create"));
+//            return;
+//        }
         System.out.println("Usage: launcher (open|create) DBPath");
     }
 
