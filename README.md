@@ -1,7 +1,6 @@
 # LNDB
 
 LNDB 是一个 Java 实现的供学习使用的数据库项目，部分原理参照自 MySQL、PostgreSQL 和 SQLite。实现了以下功能：
-
 - 数据的可靠性和数据恢复
 - 两段锁协议（2PL）实现可串行化调度
 - MVCC
